@@ -231,4 +231,6 @@
 .keeperbook-task-fav {
   align-self: flex-start;
   margin-left: 3px;
+  padding-top: 2px;
+  padding-bottom: 0px;
 }
