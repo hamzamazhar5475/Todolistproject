@@ -1,98 +1,100 @@
-✅ 1. Add State for Editing and Text
+🔧 1. Update KeeperBook.js with drag logic:
 
-Inside Task.jsx:
+Add this near the top, after useState:
 
-const [isEditing, setIsEditing] = useState(false); // controls edit mode
-const [text, setText] = useState(task.text);       // local editable text
+import { useRef } from "react";
 
-✅ 2. Start Editing
+Then inside the KeeperBook function, add:
 
-Allow the user to enter edit mode by double-clicking the task label or clicking an edit icon:
+const dragTaskRef = useRef(null);
+const dragSourceColRef = useRef(null);
 
-<span
-  onDoubleClick={() => setIsEditing(true)}
-  style={{ marginLeft: "8px", textDecoration: task.completed ? "line-through" : "none" }}
+function handleDragStart(task, columnId) {
+  dragTaskRef.current = task;
+  dragSourceColRef.current = columnId;
+}
+
+function handleDragEnd(e) {
+  e.target.style.opacity = "1";
+}
+
+function handleDrop(targetColId) {
+  const task = dragTaskRef.current;
+  const sourceColId = dragSourceColRef.current;
+
+  if (!task || sourceColId === targetColId) return;
+
+  setColumns((prevCols) => {
+    const newCols = prevCols.map((col) => {
+      if (col.id === sourceColId) {
+        return { ...col, tasks: col.tasks.filter((t) => t.id !== task.id) };
+      }
+      if (col.id === targetColId) {
+        return { ...col, tasks: [...col.tasks, task] };
+      }
+      return col;
+    });
+    return newCols;
+  });
+
+  dragTaskRef.current = null;
+  dragSourceColRef.current = null;
+}
+
+Then pass these down to Column:
+
+<Column
+  ...
+  handleDragStart={handleDragStart}
+  handleDragEnd={handleDragEnd}
+  handleDrop={handleDrop}
+/>
+
+🔧 2. Update Column.js to support dropping:
+
+Update the component props to include the new handlers:
+
+function Column({
+  ...
+  handleDragStart,
+  handleDragEnd,
+  handleDrop
+})
+
+In the return JSX, add drag-over and drop handlers on the column body:
+
+<div
+  className="keeperbook-body"
+  onDragOver={(e) => e.preventDefault()}
+  onDrop={() => handleDrop(column.id)}
 >
-  {task.text}
-</span>
+  ...
+</div>
 
-<button onClick={() => setIsEditing(true)} className="button-edit">
-  <MdEdit />
-</button>
-
-    This sets isEditing to true → shows the <input> instead of the text.
-
-✅ 3. Render Editable Input
-
-When editing is active, show the input field:
-
-{isEditing ? (
-  <input
-    className="task-edit-input"
-    value={text}
-    onChange={(e) => setText(e.target.value)}
-    onBlur={handleBlur}
-    onKeyDown={handleKeyDown}
-    autoFocus
-  />
-) : (
-  // the span and edit button above
-)}
-
-✅ 4. Handle Save on Blur or Enter
-
-function handleBlur() {
-  setIsEditing(false);
-  if (text.trim() !== task.text) {
-    updateTaskText(columnId, task.id, text.trim());
-  }
-}
-
-function handleKeyDown(e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    handleBlur();
-  }
-}
-
-✅ 5. Add updateTaskText() in KeeperBook
-
-In KeeperBook.jsx:
-
-function updateTaskText(columnId, taskId, newText) {
-  const updated = columns.map((col) =>
-    col.id === columnId
-      ? {
-          ...col,
-          tasks: col.tasks.map((task) =>
-            task.id === taskId ? { ...task, text: newText } : task
-          ),
-        }
-      : col
-  );
-  setColumns(updated);
-}
-
-✅ 6. Pass updateTaskText to Task
-
-From Column.jsx, pass it to each <Task />:
+Then, update the Task component render inside Column:
 
 <Task
   ...
-  updateTaskText={updateTaskText}
+  handleDragStart={handleDragStart}
+  handleDragEnd={handleDragEnd}
 />
 
-Make sure Column.jsx receives updateTaskText as a prop from KeeperBook.
-✅ Summary
+🔧 3. Update Task.js to be draggable:
 
-So the task editing flow works like this:
+Update props:
 
-    User double-clicks a task or clicks ✏️ edit →
-    setIsEditing(true) →
-    input is shown →
-    user types →
-    on blur or Enter →
-    handleBlur() →
-    updateTaskText() from KeeperBook →
-    columns state is updated →
-    task re-renders with new text 🎉
+function Task({
+  ...
+  handleDragStart,
+  handleDragEnd
+})
+
+Add to the main task container:
+
+<div
+  className="keeperbook-task"
+  draggable
+  onDragStart={() => handleDragStart(task, columnId)}
+  onDragEnd={handleDragEnd}
+>
+
