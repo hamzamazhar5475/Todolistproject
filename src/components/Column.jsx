@@ -15,6 +15,7 @@ function Column({
   deleteTask,
   newTaskTexts,
   updateColumnTitle,
+  toggleFavorite,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(column.title);
@@ -74,16 +75,22 @@ function Column({
       </div>
 
       <div className="keeperbook-body">
-        {column.tasks.map((task, taskIndex) => (
-          <Task
-            key={task.id}
-            task={task}
-            index={taskIndex}
-            columnId={column.id}
-            toggleTaskCompleted={toggleTaskCompleted}
-            deleteTask={deleteTask}
-          />
-        ))}
+        {[...column.tasks]
+          .sort((a, b) => {
+            if (a.favorite === b.favorite) return 0;
+            return a.favorite ? -1 : 1;
+          })
+          .map((task, taskIndex) => (
+            <Task
+              key={task.id}
+              task={task}
+              index={taskIndex}
+              columnId={column.id}
+              toggleTaskCompleted={toggleTaskCompleted}
+              deleteTask={deleteTask}
+              toggleFavorite={toggleFavorite}
+            />
+          ))}
         <div className="keeperbook-task-input-area">
           <textarea
             value={newTaskTexts[column.id] || ""}

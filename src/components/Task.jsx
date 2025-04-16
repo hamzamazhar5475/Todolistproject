@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { MdDelete, MdEdit } from "react-icons/md";
+import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 
-function Task({ task, index, columnId, deleteTask, toggleTaskCompleted }) {
+function Task({
+  task,
+  index,
+  columnId,
+  deleteTask,
+  toggleTaskCompleted,
+  toggleFavorite,
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(task.text);
 
@@ -58,6 +66,14 @@ function Task({ task, index, columnId, deleteTask, toggleTaskCompleted }) {
       >
         <MdEdit />
       </button>
+      <button
+        onClick={() => toggleFavorite(columnId, task.id)}
+        className="keeperbook-task-fav"
+        title="Favorite"
+      >
+        {task.favorite ? <MdFavorite color="red" /> : <MdFavoriteBorder />}
+      </button>
+
       <button
         onClick={() => deleteTask(columnId, task.id)}
         className="keeperbook-task-delete"

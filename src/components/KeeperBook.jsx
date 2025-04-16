@@ -31,7 +31,12 @@ function KeeperBook() {
             ...col,
             tasks: [
               ...col.tasks,
-              { id: Date.now().toString(), text, completed: false },
+              {
+                id: Date.now().toString(),
+                text,
+                completed: false,
+                favorite: false,
+              },
             ],
           }
         : col
@@ -50,19 +55,36 @@ function KeeperBook() {
   }
 
   function toggleTaskCompleted(columnId, taskId, newText) {
+    const updated = columns.map((col) => {
+      if (col.id !== columnId) return col;
+
+      const updatedTasks = col.tasks.map((task) => {
+        if (task.id !== taskId) return task;
+
+        const updatedTask = { ...task };
+
+        if (newText === undefined) {
+          updatedTask.completed = !task.completed;
+        } else {
+          updatedTask.text = newText;
+        }
+
+        return updatedTask;
+      });
+
+      return { ...col, tasks: updatedTasks };
+    });
+
+    setColumns(updated);
+  }
+
+  function toggleFavorite(columnId, taskId) {
     const updated = columns.map((col) =>
       col.id === columnId
         ? {
             ...col,
             tasks: col.tasks.map((task) =>
-              task.id === taskId
-                ? {
-                    ...task,
-                    completed:
-                      newText === undefined ? !task.completed : task.completed,
-                    text: newText !== undefined ? newText : task.text,
-                  }
-                : task
+              task.id === taskId ? { ...task, favorite: !task.favorite } : task
             ),
           }
         : col
@@ -70,6 +92,14 @@ function KeeperBook() {
     setColumns(updated);
   }
 
+  function deleteTask(columnId, taskId) {
+    const updated = columns.map((col) =>
+      col.id === columnId
+        ? { ...col, tasks: col.tasks.filter((task) => task.id !== taskId) }
+        : col
+    );
+    setColumns(updated);
+  }
   function moveLeft(index) {
     if (index === 0) return;
     const updated = [...columns];
@@ -121,6 +151,7 @@ function KeeperBook() {
               moveRight={moveRight}
               deleteColumn={deleteColumn}
               updateColumnTitle={updateColumnTitle}
+              toggleFavorite={toggleFavorite}
             />
           </div>
         ))}
