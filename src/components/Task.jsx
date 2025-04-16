@@ -1,19 +1,9 @@
 import React, { useState } from "react";
 import { MdDelete, MdEdit } from "react-icons/md";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
 function Task({ task, index, columnId, deleteTask, toggleTaskCompleted }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(task.text);
-
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: task.id.toString() });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
 
   function handleBlur() {
     setIsEditing(false);
@@ -33,19 +23,13 @@ function Task({ task, index, columnId, deleteTask, toggleTaskCompleted }) {
   }
 
   return (
-    <div
-      className="keeperbook-task"
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-    >
+    <div className="keeperbook-task">
       <label className="task_detail">
         <input
           type="checkbox"
           className="checkboxc"
-          onChange={() => toggleTaskCompleted(columnId, task.id)}
           checked={task.completed}
+          onChange={() => toggleTaskCompleted(columnId, task.id)}
         />
         {isEditing ? (
           <textarea

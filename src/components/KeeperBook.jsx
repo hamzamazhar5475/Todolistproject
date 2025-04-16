@@ -1,17 +1,4 @@
 import React, { useState } from "react";
-import {
-  DndContext,
-  closestCenter,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  horizontalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import Column from "./Column";
 import ColumnInput from "./ColumnInput";
 
@@ -23,8 +10,6 @@ function KeeperBook() {
   ]);
   const [newColumnName, setNewColumnName] = useState("");
   const [newTaskTexts, setNewTaskTexts] = useState({});
-
-  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   function handleTaskChange(columnId, value) {
     setNewTaskTexts((prev) => ({ ...prev, [columnId]: value }));
@@ -114,19 +99,6 @@ function KeeperBook() {
     setColumns(columns.filter((col) => col.id !== id));
   }
 
-  function onDragEnd(event) {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    const oldIndex = columns.findIndex(
-      (col) => col.id.toString() === active.id
-    );
-    const newIndex = columns.findIndex((col) => col.id.toString() === over.id);
-    if (oldIndex !== -1 && newIndex !== -1) {
-      setColumns((items) => arrayMove(items, oldIndex, newIndex));
-    }
-  }
-
   return (
     <div className="keeperbook-container">
       <ColumnInput
@@ -134,36 +106,25 @@ function KeeperBook() {
         setNewColumnName={setNewColumnName}
         addColumn={addColumn}
       />
-
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={onDragEnd}
-      >
-        <SortableContext
-          items={columns.map((col) => col.id.toString())}
-          strategy={horizontalListSortingStrategy}
-        >
-          <div className="keeperbook-board">
-            {columns.map((col, index) => (
-              <Column
-                key={col.id}
-                column={col}
-                index={index}
-                newTaskTexts={newTaskTexts}
-                handleTaskChange={handleTaskChange}
-                addTask={addTask}
-                deleteTask={deleteTask}
-                toggleTaskCompleted={toggleTaskCompleted}
-                moveLeft={moveLeft}
-                moveRight={moveRight}
-                deleteColumn={deleteColumn}
-                updateColumnTitle={updateColumnTitle}
-              />
-            ))}
+      <div className="keeperbook-board">
+        {columns.map((col, index) => (
+          <div className="fullname" key={col.id}>
+            <Column
+              column={col}
+              index={index}
+              newTaskTexts={newTaskTexts}
+              handleTaskChange={handleTaskChange}
+              addTask={addTask}
+              deleteTask={deleteTask}
+              toggleTaskCompleted={toggleTaskCompleted}
+              moveLeft={moveLeft}
+              moveRight={moveRight}
+              deleteColumn={deleteColumn}
+              updateColumnTitle={updateColumnTitle}
+            />
           </div>
-        </SortableContext>
-      </DndContext>
+        ))}
+      </div>
     </div>
   );
 }
