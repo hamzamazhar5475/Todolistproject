@@ -77,6 +77,22 @@ How it works:
 
     If one is favorited, it moves up in the list.
 
+
+'
+toggleFavorite={toggleFavorite}
+
+1:This line of should be give to cloumns in KeeperBook.jsx and also to task in columns.jsx.
+2:call this function in the columns.jsx and task.jsx
+'
+
+
+
+
+
+
+
+
+
 🎯 Summary
 Part of App	What It Does
 favorite field	Stores whether a task is marked as favorite
