@@ -55,24 +55,21 @@ function KeeperBook() {
   }
 
   function toggleTaskCompleted(columnId, taskId, newText) {
-    const updated = columns.map((col) => {
-      if (col.id !== columnId) return col;
+    const updated = columns.map((column) => {
+      if (column.id !== columnId) return column;
 
-      const updatedTasks = col.tasks.map((task) => {
+      const updatedTasks = column.tasks.map((task) => {
         if (task.id !== taskId) return task;
 
-        const updatedTask = { ...task };
+        return {
+          ...task,
 
-        if (newText === undefined) {
-          updatedTask.completed = !task.completed;
-        } else {
-          updatedTask.text = newText;
-        }
-
-        return updatedTask;
+          text: newText !== undefined ? newText : task.text,
+          completed: newText === undefined ? !task.completed : task.completed,
+        };
       });
 
-      return { ...col, tasks: updatedTasks };
+      return { ...column, tasks: updatedTasks };
     });
 
     setColumns(updated);
