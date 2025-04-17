@@ -129,8 +129,8 @@ function KeeperBook() {
     setColumns(columns.filter((col) => col.id !== id));
   }
 
-  const dragTaskRef = useRef(null);
-  const dragSourceColRef = useRef(null);
+  const dragTaskRef = useRef();
+  const dragSourceColRef = useRef();
 
   function handleTaskDragStart(e, task, columnId) {
     dragTaskRef.current = task;
@@ -145,8 +145,6 @@ function KeeperBook() {
   function handleTaskDrop(targetColId) {
     const task = dragTaskRef.current;
     const sourceColId = dragSourceColRef.current;
-
-    if (!task || sourceColId === targetColId) return;
 
     setColumns((prev) => {
       return prev.map((col) => {
@@ -165,9 +163,6 @@ function KeeperBook() {
         return col;
       });
     });
-
-    dragTaskRef.current = null;
-    dragSourceColRef.current = null;
   }
 
   return (
