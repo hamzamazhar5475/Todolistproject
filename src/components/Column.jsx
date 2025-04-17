@@ -61,7 +61,11 @@ function Column({
           </span>
         )}
 
-        <button onClick={() => setIsEditing(true)} className="button-edit">
+        <button
+          onClick={() => setIsEditing(true)}
+          className="button-edit"
+          style={{ display: isEditing ? "none" : "inline-block" }}
+        >
           <MdEdit />
         </button>
 
