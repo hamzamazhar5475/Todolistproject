@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Column from "./Column";
 import ColumnInput from "./ColumnInput";
 
@@ -129,6 +129,47 @@ function KeeperBook() {
     setColumns(columns.filter((col) => col.id !== id));
   }
 
+  const dragTaskRef = useRef(null);
+  const dragSourceColRef = useRef(null);
+
+  function handleTaskDragStart(e, task, columnId) {
+    dragTaskRef.current = task;
+    dragSourceColRef.current = columnId;
+    e.target.style.opacity = "0.5";
+  }
+
+  function handleTaskDragEnd(e) {
+    e.target.style.opacity = "1";
+  }
+
+  function handleTaskDrop(targetColId) {
+    const task = dragTaskRef.current;
+    const sourceColId = dragSourceColRef.current;
+
+    if (!task || sourceColId === targetColId) return;
+
+    setColumns((prev) => {
+      return prev.map((col) => {
+        if (col.id === sourceColId) {
+          return {
+            ...col,
+            tasks: col.tasks.filter((t) => t.id !== task.id),
+          };
+        }
+        if (col.id === targetColId) {
+          return {
+            ...col,
+            tasks: [...col.tasks, task],
+          };
+        }
+        return col;
+      });
+    });
+
+    dragTaskRef.current = null;
+    dragSourceColRef.current = null;
+  }
+
   return (
     <div className="keeperbook-container">
       <ColumnInput
@@ -152,6 +193,9 @@ function KeeperBook() {
               deleteColumn={deleteColumn}
               updateColumnTitle={updateColumnTitle}
               toggleFavorite={toggleFavorite}
+              handleTaskDragStart={handleTaskDragStart}
+              handleTaskDragEnd={handleTaskDragEnd}
+              handleTaskDrop={handleTaskDrop}
             />
           </div>
         ))}

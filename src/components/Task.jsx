@@ -9,6 +9,8 @@ function Task({
   deleteTask,
   toggleTaskCompleted,
   toggleFavorite,
+  handleDragStart,
+  handleDragEnd,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(task.text);
@@ -31,7 +33,13 @@ function Task({
   }
 
   return (
-    <div className="keeperbook-task">
+    <div
+      className="keeperbook-task"
+      draggable
+      onDragStart={(e) => handleDragStart(e, task, columnId)}
+      onDragEnd={handleDragEnd}
+      style={{ cursor: "move" }}
+    >
       <label className="task_detail">
         <input
           type="checkbox"

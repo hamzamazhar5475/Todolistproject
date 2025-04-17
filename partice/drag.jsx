@@ -1,87 +1,138 @@
-🔧 1. Update KeeperBook.js with drag logic:
-
-Add this near the top, after useState:
-
+🔌 At the top:
+js
+Copy
+Edit
 import { useRef } from "react";
+🧠 Inside KeeperBook:
+Add these refs and functions:
 
-Then inside the KeeperBook function, add:
-
+js
+Copy
+Edit
+// Stores the task being dragged
 const dragTaskRef = useRef(null);
+
+// Stores the ID of the column the task is being dragged from
 const dragSourceColRef = useRef(null);
 
-function handleDragStart(task, columnId) {
+
+function handleTaskDragStart(task, columnId) {
+  // When a task starts dragging, store the task itself
   dragTaskRef.current = task;
+
+  // Store which column it's coming from
   dragSourceColRef.current = columnId;
+
+  e.target.style.opacity = "0.5";
 }
 
-function handleDragEnd(e) {
+function handleTaskDragEnd(e) {
+  // Reset the opacity of the dragged element back to normal
   e.target.style.opacity = "1";
 }
 
-function handleDrop(targetColId) {
-  const task = dragTaskRef.current;
-  const sourceColId = dragSourceColRef.current;
 
+function handleTaskDrop(targetColId) {
+  const task = dragTaskRef.current;         // Task being dragged
+  const sourceColId = dragSourceColRef.current; // Column it came from
+
+  // If no task is being dragged or the source and target are the same column, do nothing
   if (!task || sourceColId === targetColId) return;
 
-  setColumns((prevCols) => {
-    const newCols = prevCols.map((col) => {
+  // Update the columns state to reflect the moved task
+  setColumns((prev) => {
+    return prev.map((col) => {
+      // If this is the column the task came from, remove the task
       if (col.id === sourceColId) {
-        return { ...col, tasks: col.tasks.filter((t) => t.id !== task.id) };
+        return {
+          ...col,
+          tasks: col.tasks.filter((t) => t.id !== task.id),
+        };
       }
+
+      // If this is the column the task is being dropped into, add the task to the end
       if (col.id === targetColId) {
-        return { ...col, tasks: [...col.tasks, task] };
+        return {
+          ...col,
+          tasks: [...col.tasks, task],
+        };
       }
+
+      // For all other columns, return them unchanged
       return col;
     });
-    return newCols;
   });
 
+  // Clear the drag references now that the task has been dropped
   dragTaskRef.current = null;
   dragSourceColRef.current = null;
 }
 
-Then pass these down to Column:
+🔁 Pass these to Column:
+In your .map() where you're rendering columns:
+
+jsx
+Copy
+Edit
 
 <Column
   ...
-  handleDragStart={handleDragStart}
-  handleDragEnd={handleDragEnd}
-  handleDrop={handleDrop}
+  handleTaskDragStart={handleTaskDragStart}
+  handleTaskDragEnd={handleTaskDragEnd}
+  handleTaskDrop={handleTaskDrop}
 />
 
-🔧 2. Update Column.js to support dropping:
-
-Update the component props to include the new handlers:
+🧩 2. Update Column.js
+✏️ Update the props:
+js
+Copy
+Edit
 
 function Column({
   ...
-  handleDragStart,
-  handleDragEnd,
-  handleDrop
+  handleTaskDragStart,
+  handleTaskDragEnd,
+  handleTaskDrop
 })
 
-In the return JSX, add drag-over and drop handlers on the column body:
+🧲 Add onDrop and onDragOver to the task container:
+Find this in your JSX:
+
+jsx
+Copy
+Edit
+
+<div className="keeperbook-body">
+
+Change it to:
+
+jsx
+Copy
+Edit
 
 <div
   className="keeperbook-body"
   onDragOver={(e) => e.preventDefault()}
-  onDrop={() => handleDrop(column.id)}
+  onDrop={() => handleTaskDrop(column.id)}
 >
-  ...
-</div>
 
-Then, update the Task component render inside Column:
+🧠 Pass the drag handlers to each task:
+In your .map() of tasks:
+
+jsx
+Copy
+Edit
 
 <Task
-  ...
-  handleDragStart={handleDragStart}
-  handleDragEnd={handleDragEnd}
+  handleDragStart={handleTaskDragStart}
+  handleDragEnd={handleTaskDragEnd}
 />
 
-🔧 3. Update Task.js to be draggable:
-
-Update props:
+🎯 3. Update Task.js to make it draggable
+✏️ Add new props:
+js
+Copy
+Edit
 
 function Task({
   ...
@@ -89,12 +140,17 @@ function Task({
   handleDragEnd
 })
 
-Add to the main task container:
+🔁 Wrap the outer div:
+Update the main container to be draggable with cursor styling:
+
+jsx
+Copy
+Edit
 
 <div
   className="keeperbook-task"
   draggable
-  onDragStart={() => handleDragStart(task, columnId)}
+  onDragStart={(e) => handleDragStart(e, task, columnId)}
   onDragEnd={handleDragEnd}
+  style={{ cursor: "move" }}
 >
-

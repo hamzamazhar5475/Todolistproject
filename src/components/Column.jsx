@@ -16,6 +16,9 @@ function Column({
   newTaskTexts,
   updateColumnTitle,
   toggleFavorite,
+  handleTaskDragStart,
+  handleTaskDragEnd,
+  handleTaskDrop,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(column.title);
@@ -74,7 +77,11 @@ function Column({
         </button>
       </div>
 
-      <div className="keeperbook-body">
+      <div
+        className="keeperbook-body"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={() => handleTaskDrop(column.id)}
+      >
         {[...column.tasks]
           .sort((a, b) => {
             if (a.favorite === b.favorite) return 0;
@@ -89,6 +96,8 @@ function Column({
               toggleTaskCompleted={toggleTaskCompleted}
               deleteTask={deleteTask}
               toggleFavorite={toggleFavorite}
+              handleDragStart={handleTaskDragStart}
+              handleDragEnd={handleTaskDragEnd}
             />
           ))}
         <div className="keeperbook-task-input-area">
