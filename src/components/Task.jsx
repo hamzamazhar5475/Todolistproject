@@ -71,6 +71,7 @@ function Task({
         onClick={() => setIsEditing(true)}
         className="keeperbook-task-edit"
         title="Edit"
+        style={{ display: isEditing ? "none" : "inline-block" }}
       >
         <MdEdit />
       </button>
