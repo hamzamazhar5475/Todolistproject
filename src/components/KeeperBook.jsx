@@ -143,6 +143,10 @@ function KeeperBook() {
     const task = dragTaskRef.current;
     const sourceColId = dragSourceColRef.current;
 
+    if (sourceColId === targetColId) {
+      return
+    }
+
     setColumns((prev) => {
       return prev.map((col) => {
         if (col.id === sourceColId) {

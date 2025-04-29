@@ -61,7 +61,6 @@ function Task({
             style={{
               textDecoration: task.completed ? "line-through" : "none",
             }}
-            onDoubleClick={() => setIsEditing(true)}
           >
             {task.text}
           </span>
