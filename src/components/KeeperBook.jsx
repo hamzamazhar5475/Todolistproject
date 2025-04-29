@@ -5,8 +5,8 @@ import ColumnInput from "./ColumnInput";
 function KeeperBook() {
   const [columns, setColumns] = useState([
     { id: 1, title: "To DO", tasks: [] },
-    { id: 2, title: "Development", tasks: [] },
-    { id: 4, title: "In Review", tasks: [] },
+    { id: 2, title: "In Progress ", tasks: [] },
+    { id: 3, title: "In Review", tasks: [] },
   ]);
   const [newColumnName, setNewColumnName] = useState("");
   const [newTaskTexts, setNewTaskTexts] = useState({});
@@ -143,8 +143,8 @@ function KeeperBook() {
     const task = dragTaskRef.current;
     const sourceColId = dragSourceColRef.current;
 
-    if (sourceColId === targetColId) {
-      return
+    if (sourceColId === targetColId){
+      return;
     }
 
     setColumns((prev) => {
