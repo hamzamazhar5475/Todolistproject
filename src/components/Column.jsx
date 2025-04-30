@@ -15,6 +15,10 @@ function Column({
   deleteTask,
   newTaskTexts,
   updateColumnTitle,
+  toggleFavorite,
+  handleTaskDragStart,
+  handleTaskDragEnd,
+  handleTaskDrop,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(column.title);
@@ -57,7 +61,11 @@ function Column({
           </span>
         )}
 
-        <button onClick={() => setIsEditing(true)} className="button-edit">
+        <button
+          onClick={() => setIsEditing(true)}
+          className="button-edit"
+          style={{ display: isEditing ? "none" : "inline-block" }}
+        >
           <MdEdit />
         </button>
 
@@ -73,17 +81,29 @@ function Column({
         </button>
       </div>
 
-      <div className="keeperbook-body">
-        {column.tasks.map((task, taskIndex) => (
-          <Task
-            key={task.id}
-            task={task}
-            index={taskIndex}
-            columnId={column.id}
-            toggleTaskCompleted={toggleTaskCompleted}
-            deleteTask={deleteTask}
-          />
-        ))}
+      <div
+        className="keeperbook-body"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={() => handleTaskDrop(column.id)}
+      >
+        {[...column.tasks]
+          .sort((a, b) => {
+            if (a.favorite === b.favorite) return 0;
+            return a.favorite ? -1 : 1;
+          })
+          .map((task, taskIndex) => (
+            <Task
+              key={task.id}
+              task={task}
+              index={taskIndex}
+              columnId={column.id}
+              toggleTaskCompleted={toggleTaskCompleted}
+              deleteTask={deleteTask}
+              toggleFavorite={toggleFavorite}
+              handleDragStart={handleTaskDragStart}
+              handleDragEnd={handleTaskDragEnd}
+            />
+          ))}
         <div className="keeperbook-task-input-area">
           <textarea
             value={newTaskTexts[column.id] || ""}
