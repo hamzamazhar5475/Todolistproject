@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import KeeperBook from "./components/KeeperBook";
-import "./index.css";
+import KeeperBook from "./src/components/KeeperBook";
+import "./../public/styles.css";
 
 const root = createRoot(document.getElementById("root"));
 root.render(<KeeperBook />);

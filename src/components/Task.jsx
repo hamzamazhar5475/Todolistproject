@@ -1,17 +1,7 @@
 import React, { useState } from "react";
 import { MdDelete, MdEdit } from "react-icons/md";
-import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 
-function Task({
-  task,
-  index,
-  columnId,
-  deleteTask,
-  toggleTaskCompleted,
-  toggleFavorite,
-  handleDragStart,
-  handleDragEnd,
-}) {
+function Task({ task, index, columnId, deleteTask, toggleTaskCompleted }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(task.text);
 
@@ -33,13 +23,7 @@ function Task({
   }
 
   return (
-    <div
-      className="keeperbook-task"
-      draggable
-      onDragStart={(e) => handleDragStart(e, task, columnId)}
-      onDragEnd={handleDragEnd}
-      style={{ cursor: "move" }}
-    >
+    <div className="keeperbook-task">
       <label className="task_detail">
         <input
           type="checkbox"
@@ -61,6 +45,7 @@ function Task({
             style={{
               textDecoration: task.completed ? "line-through" : "none",
             }}
+            onDoubleClick={() => setIsEditing(true)}
           >
             {task.text}
           </span>
@@ -70,18 +55,9 @@ function Task({
         onClick={() => setIsEditing(true)}
         className="keeperbook-task-edit"
         title="Edit"
-        style={{ display: isEditing ? "none" : "inline-block" }}
       >
         <MdEdit />
       </button>
-      <button
-        onClick={() => toggleFavorite(columnId, task.id)}
-        className="keeperbook-task-fav"
-        title="Favorite"
-      >
-        {task.favorite ? <MdFavorite color="red" /> : <MdFavoriteBorder />}
-      </button>
-
       <button
         onClick={() => deleteTask(columnId, task.id)}
         className="keeperbook-task-delete"

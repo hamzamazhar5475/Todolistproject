@@ -1,156 +1,98 @@
-🔌 At the top:
-js
-Copy
-Edit
-import { useRef } from "react";
-🧠 Inside KeeperBook:
-Add these refs and functions:
+✅ 1. Add State for Editing and Text
 
-js
-Copy
-Edit
-// Stores the task being dragged
-const dragTaskRef = useRef(null);
+Inside Task.jsx:
 
-// Stores the ID of the column the task is being dragged from
-const dragSourceColRef = useRef(null);
+const [isEditing, setIsEditing] = useState(false); // controls edit mode
+const [text, setText] = useState(task.text);       // local editable text
 
+✅ 2. Start Editing
 
-function handleTaskDragStart(task, columnId) {
-  // When a task starts dragging, store the task itself
-  dragTaskRef.current = task;
+Allow the user to enter edit mode by double-clicking the task label or clicking an edit icon:
 
-  // Store which column it's coming from
-  dragSourceColRef.current = columnId;
-
-  e.target.style.opacity = "0.5";
-}
-
-function handleTaskDragEnd(e) {
-  // Reset the opacity of the dragged element back to normal
-  e.target.style.opacity = "1";
-}
-
-
-function handleTaskDrop(targetColId) {
-  const task = dragTaskRef.current;         // Task being dragged
-  const sourceColId = dragSourceColRef.current; // Column it came from
-
-  // If no task is being dragged or the source and target are the same column, do nothing
-  if (!task || sourceColId === targetColId) return;
-
-  // Update the columns state to reflect the moved task
-  setColumns((prev) => {
-    return prev.map((col) => {
-      // If this is the column the task came from, remove the task
-      if (col.id === sourceColId) {
-        return {
-          ...col,
-          tasks: col.tasks.filter((t) => t.id !== task.id),
-        };
-      }
-
-      // If this is the column the task is being dropped into, add the task to the end
-      if (col.id === targetColId) {
-        return {
-          ...col,
-          tasks: [...col.tasks, task],
-        };
-      }
-
-      // For all other columns, return them unchanged
-      return col;
-    });
-  });
-
-  // Clear the drag references now that the task has been dropped
-  dragTaskRef.current = null;
-  dragSourceColRef.current = null;
-}
-
-🔁 Pass these to Column:
-In your .map() where you're rendering columns:
-
-jsx
-Copy
-Edit
-
-<Column
-  ...
-  handleTaskDragStart={handleTaskDragStart}
-  handleTaskDragEnd={handleTaskDragEnd}
-  handleTaskDrop={handleTaskDrop}
-/>
-
-🧩 2. Update Column.js
-✏️ Update the props:
-js
-Copy
-Edit
-
-function Column({
-  ...
-  handleTaskDragStart,
-  handleTaskDragEnd,
-  handleTaskDrop
-})
-
-🧲 Add onDrop and onDragOver to the task container:
-Find this in your JSX:
-
-jsx
-Copy
-Edit
-
-<div className="keeperbook-body">
-
-Change it to:
-
-jsx
-Copy
-Edit
-
-<div
-  className="keeperbook-body"
-  onDragOver={(e) => e.preventDefault()}
-  onDrop={() => handleTaskDrop(column.id)}
+<span
+  onDoubleClick={() => setIsEditing(true)}
+  style={{ marginLeft: "8px", textDecoration: task.completed ? "line-through" : "none" }}
 >
+  {task.text}
+</span>
 
-🧠 Pass the drag handlers to each task:
-In your .map() of tasks:
+<button onClick={() => setIsEditing(true)} className="button-edit">
+  <MdEdit />
+</button>
 
-jsx
-Copy
-Edit
+    This sets isEditing to true → shows the <input> instead of the text.
+
+✅ 3. Render Editable Input
+
+When editing is active, show the input field:
+
+{isEditing ? (
+  <input
+    className="task-edit-input"
+    value={text}
+    onChange={(e) => setText(e.target.value)}
+    onBlur={handleBlur}
+    onKeyDown={handleKeyDown}
+    autoFocus
+  />
+) : (
+  // the span and edit button above
+)}
+
+✅ 4. Handle Save on Blur or Enter
+
+function handleBlur() {
+  setIsEditing(false);
+  if (text.trim() !== task.text) {
+    updateTaskText(columnId, task.id, text.trim());
+  }
+}
+
+function handleKeyDown(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleBlur();
+  }
+}
+
+✅ 5. Add updateTaskText() in KeeperBook
+
+In KeeperBook.jsx:
+
+function updateTaskText(columnId, taskId, newText) {
+  const updated = columns.map((col) =>
+    col.id === columnId
+      ? {
+          ...col,
+          tasks: col.tasks.map((task) =>
+            task.id === taskId ? { ...task, text: newText } : task
+          ),
+        }
+      : col
+  );
+  setColumns(updated);
+}
+
+✅ 6. Pass updateTaskText to Task
+
+From Column.jsx, pass it to each <Task />:
 
 <Task
-  handleDragStart={handleTaskDragStart}
-  handleDragEnd={handleTaskDragEnd}
+  ...
+  updateTaskText={updateTaskText}
 />
 
-🎯 3. Update Task.js to make it draggable
-✏️ Add new props:
-js
-Copy
-Edit
+Make sure Column.jsx receives updateTaskText as a prop from KeeperBook.
+✅ Summary
 
-function Task({
-  ...
-  handleDragStart,
-  handleDragEnd
-})
+So the task editing flow works like this:
 
-🔁 Wrap the outer div:
-Update the main container to be draggable with cursor styling:
-
-jsx
-Copy
-Edit
-
-<div
-  className="keeperbook-task"
-  draggable
-  onDragStart={(e) => handleDragStart(e, task, columnId)}
-  onDragEnd={handleDragEnd}
-  style={{ cursor: "move" }}
->
+    User double-clicks a task or clicks ✏️ edit →
+    setIsEditing(true) →
+    input is shown →
+    user types →
+    on blur or Enter →
+    handleBlur() →
+    updateTaskText() from KeeperBook →
+    columns state is updated →
+    task re-renders with new text 🎉
